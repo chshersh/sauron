@@ -90,6 +90,7 @@ library
     , http-client-tls      ^>= 0.3
     , iris                 ^>= 0.0
     , optparse-applicative ^>= 0.17
+    , pretty-simple
     , servant              ^>= 0.19
     , servant-client       ^>= 0.19
 
