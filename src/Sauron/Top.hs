@@ -11,13 +11,11 @@ module Sauron.Top
     ( runTop
     ) where
 
-import Text.Pretty.Simple (pPrint)
-
 import Sauron.App (App)
 import Sauron.Cli (CacheMode (..), TopArgs (..))
 import Sauron.Top.Client (getUserIdByUsername)
-import Sauron.Top.Json (Page)
-import Sauron.Top.Tweet (Tweet)
+import Sauron.Top.Json (Data (..), Page (..))
+import Sauron.Top.Tweet (Tweet, topTweets)
 import Sauron.Top.User (UserId (..), mkUsername)
 
 import qualified Data.Aeson as Aeson
@@ -35,4 +33,8 @@ runTop TopArgs{..} = do
         FromFile fromFile ->
             liftIO (Aeson.eitherDecodeFileStrict @(Page [Tweet]) fromFile) >>= \case
                 Left err       -> putStrLn $ "Error: " <> err
-                Right timeline -> pPrint timeline
+                Right timeline ->
+                    putTextLn
+                    $ topTweets topArgsMax username
+                    $ unData
+                    $ pageData timeline

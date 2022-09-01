@@ -8,9 +8,14 @@ The 'Tweet' type in the JSON API response.
 
 module Sauron.Top.Tweet
     ( Tweet (..)
+    , topTweets
     ) where
 
 import Data.Aeson (FromJSON (..), withObject, (.:))
+
+import Sauron.Top.User (Username (..))
+
+import qualified Data.Text as Text
 
 
 data Tweet = Tweet
@@ -29,7 +34,7 @@ data Tweet = Tweet
     "like_count": 1,
     "quote_count": 0
   },
-  "text": "🔮 I still had some theories about the space leak. All the metrics show that it's not the Haskell process that leaks memory.\n\nI was even suspecting space leaks in SQLite itself as my setup was unusual. But I didn't have the time to verify my hypothesis so we'll never know...",
+  "text": "🔮 I still had some theories about the space leak...",
   "created_at": "2022-09-01T07:54:18.000Z",
   "id": "1565246655103995905"
 }
@@ -44,3 +49,36 @@ instance FromJSON Tweet where
         tweetLikeCount <- publicMetrics .: "like_count"
 
         pure Tweet{..}
+
+-- | Extract top N tweets and pretty format them.
+topTweets :: Int -> Username -> [Tweet] -> Text
+topTweets maxTweets username
+    = formatTweets username
+    . take maxTweets
+    . sortWith (Down . tweetLikeCount)
+
+formatTweets :: Username -> [Tweet] -> Text
+formatTweets _ [] = "No tweets found"
+formatTweets username tweets = foldMap formatTweet tweets
+  where
+    formatTweet :: Tweet -> Text
+    formatTweet Tweet{..} = unlines
+        [ "URL:   " <> tweetUrl
+        , "Likes: " <> show tweetLikeCount
+        , "Text:"
+        , chunkedText
+        ]
+      where
+        tweetUrl :: Text
+        tweetUrl = mconcat
+            [ "https://twitter.com/"
+            , unUsername username
+            , "/status/"
+            , tweetId
+            ]
+
+        chunkedText :: Text
+        chunkedText
+            = unlines
+            $ map ("    " <>)
+            $ Text.chunksOf 60 tweetText
