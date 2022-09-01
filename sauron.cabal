@@ -80,7 +80,8 @@ library
       Sauron.Cli
       Sauron.Top
         Sauron.Top.Client
-        Sauron.Top.Model
+        Sauron.Top.Json
+        Sauron.Top.User
 
   build-depends:
     , aeson                ^>= 2.1

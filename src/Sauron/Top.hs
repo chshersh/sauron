@@ -13,8 +13,8 @@ module Sauron.Top
 
 import Sauron.App (App)
 import Sauron.Cli (TopArgs (..))
-import Sauron.Top.Model (UserId (..), mkUsername)
 import Sauron.Top.Client (getUserIdByUsername)
+import Sauron.Top.User (UserId (..), mkUsername)
 
 
 runTop :: TopArgs -> App ()

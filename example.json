@@ -1,1 +1,66 @@
-{"data":[{"public_metrics":{"retweet_count":0,"reply_count":0,"like_count":0,"quote_count":0},"text":"@klarkc In this particular case, laziness wasn't the problem. Something weirder was going on \uD83E\uDD14","created_at":"2022-09-01T10:21:32.000Z","id":"1565283709275803650"},{"public_metrics":{"retweet_count":0,"reply_count":2,"like_count":1,"quote_count":0},"text":"If you haven't finished your tea, I invite you to read one of my previous journeys into the wonders of the SQLite type system \uD83D\uDDFA️\uD83E\uDED6\uD83D\uDE82\n\nhttps://t.co/4RElElHu0Z","created_at":"2022-09-01T07:54:18.000Z","id":"1565246658128056320"},{"public_metrics":{"retweet_count":0,"reply_count":1,"like_count":1,"quote_count":0},"text":"\uD83D\uDD2E I still had some theories about the space leak. All the metrics show that it's not the Haskell process that leaks memory.\n\nI was even suspecting space leaks in SQLite itself as my setup was unusual. But I didn't have the time to verify my hypothesis so we'll never know...","created_at":"2022-09-01T07:54:18.000Z","id":"1565246655103995905"},{"public_metrics":{"retweet_count":0,"reply_count":1,"like_count":6,"quote_count":0},"text":"Are you still here? Do you still want to know how I solved this space leak? Very simple:\n\n\uD83C\uDFDD️ I left my job\n\nNow, it's no longer my problem and somebody else will continue what I've started \uD83D\uDC76","created_at":"2022-09-01T07:54:17.000Z","id":"1565246652121767936"},{"public_metrics":{"retweet_count":0,"reply_count":1,"like_count":1,"quote_count":0},"text":"\uD83D\uDDFA️ Now, real digging started. I had to use old Unix tools as my grandpa did in the good old times.\n\nI sampled the output of the /proc/rss values to check the real memory usage of my process. I've even looked at the diff between mmaped memory regions.\n\nStill, no results \uD83D\uDE45","created_at":"2022-09-01T07:54:16.000Z","id":"1565246649185849344"}],"meta":{"result_count":5,"newest_id":"1565283709275803650","oldest_id":"1565246649185849344","next_token":"7140dibdnow9c7btw4232rrxi2153ga6h81clvyarutkk"}}
+{
+  "data": [
+    {
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0
+      },
+      "text": "@klarkc In this particular case, laziness wasn't the problem. Something weirder was going on 🤔",
+      "created_at": "2022-09-01T10:21:32.000Z",
+      "id": "1565283709275803650"
+    },
+    {
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 2,
+        "like_count": 1,
+        "quote_count": 0
+      },
+      "text": "If you haven't finished your tea, I invite you to read one of my previous journeys into the wonders of the SQLite type system 🗺️🫖🚂\n\nhttps://t.co/4RElElHu0Z",
+      "created_at": "2022-09-01T07:54:18.000Z",
+      "id": "1565246658128056320"
+    },
+    {
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 1,
+        "like_count": 1,
+        "quote_count": 0
+      },
+      "text": "🔮 I still had some theories about the space leak. All the metrics show that it's not the Haskell process that leaks memory.\n\nI was even suspecting space leaks in SQLite itself as my setup was unusual. But I didn't have the time to verify my hypothesis so we'll never know...",
+      "created_at": "2022-09-01T07:54:18.000Z",
+      "id": "1565246655103995905"
+    },
+    {
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 1,
+        "like_count": 6,
+        "quote_count": 0
+      },
+      "text": "Are you still here? Do you still want to know how I solved this space leak? Very simple:\n\n🏝️ I left my job\n\nNow, it's no longer my problem and somebody else will continue what I've started 👶",
+      "created_at": "2022-09-01T07:54:17.000Z",
+      "id": "1565246652121767936"
+    },
+    {
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 1,
+        "like_count": 1,
+        "quote_count": 0
+      },
+      "text": "🗺️ Now, real digging started. I had to use old Unix tools as my grandpa did in the good old times.\n\nI sampled the output of the /proc/rss values to check the real memory usage of my process. I've even looked at the diff between mmaped memory regions.\n\nStill, no results 🙅",
+      "created_at": "2022-09-01T07:54:16.000Z",
+      "id": "1565246649185849344"
+    }
+  ],
+  "meta": {
+    "result_count": 5,
+    "newest_id": "1565283709275803650",
+    "oldest_id": "1565246649185849344",
+    "next_token": "7140dibdnow9c7btw4232rrxi2153ga6h81clvyarutkk"
+  }
+}
+

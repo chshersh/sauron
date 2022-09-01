@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE TypeOperators #-}
 
 {- |
@@ -29,11 +29,12 @@ module Sauron.Top.Client
     ) where
 
 import Control.Exception (throwIO)
-import Servant.API (Capture, Get, JSON, (:>), Required, Strict, Header')
-import Servant.Client (BaseUrl (..), Scheme (Https), ClientM, client, runClientM, mkClientEnv)
+import Servant.API (Capture, Get, Header', JSON, Required, Strict, (:>))
+import Servant.Client (BaseUrl (..), ClientM, Scheme (Https), client, mkClientEnv, runClientM)
 
 import Sauron.App (App, Env (..))
-import Sauron.Top.Model (Data (..), UserId, Username (..))
+import Sauron.Top.Json (Data (..))
+import Sauron.Top.User (UserId, Username (..))
 
 import qualified Iris
 
@@ -68,15 +69,15 @@ userIdByUsername = client $ Proxy @UserIdByUsername
 
 getUserIdByUsername :: Username -> App UserId
 getUserIdByUsername (Username username) = do
-  manager <- Iris.asksAppEnv envManager
-  let clientEnv = mkClientEnv manager twitterBaseUrl
+    manager <- Iris.asksAppEnv envManager
+    let clientEnv = mkClientEnv manager twitterBaseUrl
 
-  token <- Iris.asksAppEnv envToken
-  let auth = "Bearer " <> token
+    token <- Iris.asksAppEnv envToken
+    let auth = "Bearer " <> token
 
-  res <- liftIO $ runClientM (userIdByUsername auth username) clientEnv
-  case res of
-    Right (Data userId) -> pure userId
-    Left err -> do
-        putStrLn $ "Error: " ++ show err
-        liftIO $ throwIO err
+    res <- liftIO $ runClientM (userIdByUsername auth username) clientEnv
+    case res of
+      Right (Data userId) -> pure userId
+      Left err -> do
+          putStrLn $ "Error: " ++ show err
+          liftIO $ throwIO err
