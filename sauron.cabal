@@ -78,19 +78,24 @@ library
     Sauron
       Sauron.App
       Sauron.Cli
-      Sauron.Run
-        Sauron.Run.Top
-
+      Sauron.Top
+        Sauron.Top.Client
+        Sauron.Top.Model
 
   build-depends:
+    , aeson                ^>= 2.1
+    , http-client          ^>= 0.7
+    , http-client-tls      ^>= 0.3
     , iris                 ^>= 0.0
     , optparse-applicative ^>= 0.17
+    , servant              ^>= 0.19
     , servant-client       ^>= 0.19
 
 executable sauron
+  import:              common-options
   hs-source-dirs:      app
   main-is:             Main.hs
-  build-depends:       base, sauron
+  build-depends:       sauron
   ghc-options:         -threaded
                        -rtsopts
                        -with-rtsopts=-N
