@@ -63,6 +63,7 @@ common common-options
                        RecordWildCards
                        ScopedTypeVariables
                        StandaloneDeriving
+                       StrictData
                        TupleSections
                        TypeApplications
                        ViewPatterns
@@ -92,6 +93,7 @@ library
     , optparse-applicative ^>= 0.17
     , servant              ^>= 0.19
     , servant-client       ^>= 0.19
+    , time                 ^>= 1.11
 
 executable sauron
   import:              common-options
@@ -120,6 +122,7 @@ test-suite sauron-test
     , hspec >= 2.9.7 && < 2.11
     , servant
     , servant-client-core
+    , time
 
   ghc-options:         -threaded
                        -rtsopts

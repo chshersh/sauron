@@ -5,6 +5,7 @@ import Servant.Links (allLinks, linkURI)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 import Sauron.Top.Client (GetTweets, twitterBaseUrl)
+import Sauron.Top.User (UserId (..))
 
 
 clientSpec :: Spec
@@ -24,7 +25,7 @@ generatedUrl = mconcat
          $ linkURI
          $ allLinks
              (Proxy @GetTweets)
-             "2164623379"
+             (UserId "2164623379")
              (Just 5)
              (Just "retweets")
              (Just "created_at,public_metrics")

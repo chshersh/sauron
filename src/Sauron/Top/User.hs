@@ -14,6 +14,7 @@ module Sauron.Top.User
     ) where
 
 import Data.Aeson (FromJSON (..), withObject, (.:))
+import Servant.API (ToHttpApiData)
 
 import qualified Data.Text as Text
 
@@ -21,7 +22,7 @@ import qualified Data.Text as Text
 -- | A Twitter User ID like: "2244994945"
 newtype UserId = UserId
     { unUserId :: Text
-    }
+    } deriving newtype (ToHttpApiData)
 
 {- |
 
@@ -47,7 +48,7 @@ Use 'mkUsername' for safe creation.
 -}
 newtype Username = Username
     { unUsername :: Text
-    }
+    } deriving newtype (ToHttpApiData)
 
 -- | Strips \@ from the username
 mkUsername :: Text -> Username

@@ -69,14 +69,14 @@ type GetUserIdByUsername
     :> "users"
     :> "by"
     :> "username"
-    :> Capture "username" Text
+    :> Capture "username" Username
     :> Get '[JSON] (Data UserId)
 
-getUserIdByUsernameClient :: Text -> Text -> ClientM (Data UserId)
+getUserIdByUsernameClient :: Text -> Username -> ClientM (Data UserId)
 getUserIdByUsernameClient = client $ Proxy @GetUserIdByUsername
 
 getUserIdByUsername :: Username -> App UserId
-getUserIdByUsername (Username username) = do
+getUserIdByUsername username = do
     manager <- Iris.asksAppEnv envManager
     let clientEnv = mkClientEnv manager twitterBaseUrl
 
@@ -99,10 +99,10 @@ https://api.twitter.com/2/users/2164623379/tweets?max_results=5&exclude=retweets
 type GetTweets
     =  RequiredHeader "Authorization" Text
     :> "users"
-    :> Capture "id" Text
+    :> Capture "id" UserId
     :> "tweets"
     :> QueryParam "max_results" Int
     :> QueryParam "exclude" Text
     :> QueryParam "tweet.fields" Text
-    :> QueryParam "end_time" Text
+    :> QueryParam "end_time" String
     :> Get '[JSON] (Page [Tweet])

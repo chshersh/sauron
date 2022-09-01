@@ -9,9 +9,15 @@ The 'Tweet' type in the JSON API response.
 module Sauron.Top.Tweet
     ( Tweet (..)
     , topTweets
+
+      -- * Internals
+    , parseTime
+    , showTime
     ) where
 
 import Data.Aeson (FromJSON (..), withObject, (.:))
+import Data.Time.Clock (UTCTime)
+import Data.Time.Format.ISO8601 (formatParseM, formatShowM, iso8601Format)
 
 import Sauron.Top.User (Username (..))
 
@@ -22,7 +28,14 @@ data Tweet = Tweet
     { tweetId        :: Text
     , tweetText      :: Text
     , tweetLikeCount :: Int
+    , tweetCreatedAt :: UTCTime
     } deriving stock (Show, Eq)
+
+parseTime :: String -> Maybe UTCTime
+parseTime = formatParseM iso8601Format
+
+showTime :: UTCTime -> Maybe String
+showTime = formatShowM iso8601Format
 
 {- | Parses Tweet from the following JSON object:
 
@@ -45,6 +58,11 @@ instance FromJSON Tweet where
         tweetId   <- o .: "id"
         tweetText <- o .: "text"
 
+        createdAt <- o .: "created_at"
+        tweetCreatedAt <- case parseTime createdAt of
+            Nothing   -> fail $ "Error parsing time: " <> createdAt
+            Just time -> pure time
+
         publicMetrics <- o .: "public_metrics"
         tweetLikeCount <- publicMetrics .: "like_count"
 
@@ -63,9 +81,10 @@ formatTweets username tweets = foldMap formatTweet tweets
   where
     formatTweet :: Tweet -> Text
     formatTweet Tweet{..} = unlines
-        [ "URL:   " <> tweetUrl
-        , "Likes: " <> show tweetLikeCount
-        , "Text:"
+        [ "URL          : " <> tweetUrl
+        , "Tweeted at   : " <> maybe "<unknown>" toText (showTime tweetCreatedAt)
+        , "Likes        : " <> show tweetLikeCount
+        , "Awesome text :"
         , chunkedText
         ]
       where
