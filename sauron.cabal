@@ -45,8 +45,6 @@ common common-options
     ghc-options:       -Wmissing-deriving-strategies
                        -fwrite-ide-info
                        -hiedir=.hie
-  if impl(ghc >= 8.10)
-    ghc-options:       -Wunused-packages
   if impl(ghc >= 9.0)
     ghc-options:       -Winvalid-haddock
   if impl(ghc >= 9.2)
@@ -72,23 +70,27 @@ common common-options
 library
   import:              common-options
   hs-source-dirs:      src
-  exposed-modules:     Sauron
+
+  autogen-modules:     Paths_sauron
+  other-modules:       Paths_sauron
+
+  exposed-modules:
+    Sauron
+      Sauron.App
+      Sauron.Cli
+      Sauron.Run
+        Sauron.Run.Top
+
+
+  build-depends:
+    , iris                 ^>= 0.0
+    , optparse-applicative ^>= 0.17
+    , servant-client       ^>= 0.19
 
 executable sauron
-  import:              common-options
   hs-source-dirs:      app
   main-is:             Main.hs
-  build-depends:       sauron
-  ghc-options:         -threaded
-                       -rtsopts
-                       -with-rtsopts=-N
-
-test-suite sauron-test
-  import:              common-options
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Spec.hs
-  build-depends:       sauron
+  build-depends:       base, sauron
   ghc-options:         -threaded
                        -rtsopts
                        -with-rtsopts=-N
