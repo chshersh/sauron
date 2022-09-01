@@ -93,6 +93,7 @@ library
     , optparse-applicative ^>= 0.17
     , servant              ^>= 0.19
     , servant-client       ^>= 0.19
+    , servant-client-core  ^>= 0.19
     , time                 ^>= 1.11
 
 executable sauron

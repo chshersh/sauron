@@ -30,6 +30,7 @@ generatedUrl = mconcat
              (Just "retweets")
              (Just "created_at,public_metrics")
              (Just "2022-09-01T13:52:14Z")
+             Nothing
 
 expectedUrl :: Text
 expectedUrl = "https://api.twitter.com/2/users/2164623379/tweets?max_results=5&exclude=retweets&tweet.fields=created_at%2Cpublic_metrics&end_time=2022-09-01T13%3A52%3A14Z"

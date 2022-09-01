@@ -6,27 +6,19 @@ Copyright: (c) 2022 Dmitrii Kovanikov
 SPDX-License-Identifier: MPL-2.0
 Maintainer: Dmitrii Kovanikov <kovanikov@gmail.com>
 
-Functions for contacting Twitter API:
+Functions for querying Twitter API.
 
 __Auth:__
 
 @
 Authorization: Bearer $TWITTER_TOKEN
 @
-
-__Getting tweets by user ID:__
-
-@
-curl \
-    -H "Authorization: Bearer $TWITTER_TOKEN" \
-    ''
-@
-
 -}
 
 module Sauron.Top.Client
     ( -- * User
       getUserIdByUsername
+    , getTweets
 
       -- * Tweets
     , GetTweets
@@ -38,6 +30,7 @@ module Sauron.Top.Client
 import Control.Exception (throwIO)
 import Servant.API (Capture, Get, Header', JSON, QueryParam, Required, Strict, (:>))
 import Servant.Client (BaseUrl (..), ClientM, Scheme (Https), client, mkClientEnv, runClientM)
+import Servant.Client.Core (ClientError)
 
 import Sauron.App (App, Env (..))
 import Sauron.Top.Json (Data (..), Page (..))
@@ -83,11 +76,13 @@ getUserIdByUsername username = do
     token <- Iris.asksAppEnv envToken
     let auth = "Bearer " <> token
 
-    res <- liftIO $ runClientM (getUserIdByUsernameClient auth username) clientEnv
+    let request = getUserIdByUsernameClient auth username
+
+    res <- liftIO $ runClientM request clientEnv
     case res of
       Right (Data userId) -> pure userId
       Left err -> do
-          putStrLn $ "Error: " ++ show err
+          putStrLn $ "Error getting user ID: " ++ show err
           liftIO $ throwIO err
 
 {- | API type for the following URL:
@@ -105,4 +100,42 @@ type GetTweets
     :> QueryParam "exclude" Text
     :> QueryParam "tweet.fields" Text
     :> QueryParam "end_time" String
+    :> QueryParam "pagination_token" Text
     :> Get '[JSON] (Page [Tweet])
+
+getTweetsClient
+    :: Text
+    -> UserId
+    -> Maybe Int
+    -> Maybe Text
+    -> Maybe Text
+    -> Maybe String
+    -> Maybe Text
+    -> ClientM (Page [Tweet])
+getTweetsClient = client $ Proxy @GetTweets
+
+getTweetsClientRequest :: Text -> UserId -> String -> Maybe Text -> ClientM (Page [Tweet])
+getTweetsClientRequest authToken userId endTime paginationToken = getTweetsClient
+    authToken
+    userId
+    (Just 100)  -- Return 100 requests (max allowed)
+    (Just "retweets")  -- exclude retweets
+    (Just "created_at,public_metrics")  -- extra fields to return
+    (Just endTime)
+    paginationToken
+
+getTweets :: UserId -> String -> Maybe Text -> App (Either ClientError (Page [Tweet]))
+getTweets userId endTime paginationToken = do
+    manager <- Iris.asksAppEnv envManager
+    let clientEnv = mkClientEnv manager twitterBaseUrl
+
+    token <- Iris.asksAppEnv envToken
+    let auth = "Bearer " <> token
+
+    let request = getTweetsClientRequest
+            auth
+            userId
+            endTime
+            paginationToken
+
+    liftIO $ runClientM request clientEnv
