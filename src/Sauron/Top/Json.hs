@@ -25,7 +25,8 @@ field. For example:
 -}
 newtype Data a = Data
     { unData :: a
-    }
+    } deriving stock (Show)
+      deriving newtype (Eq)
 
 instance (FromJSON a, Typeable a) => FromJSON (Data a) where
     parseJSON = withObject ("Data " <> type_) $ \o -> do
@@ -49,7 +50,7 @@ instance (FromJSON a, Typeable a) => FromJSON (Data a) where
 data Meta = Meta
     { metaResultCount :: Int
     , metaNextToken   :: Maybe Text
-    }
+    } deriving stock (Show, Eq)
 
 instance FromJSON Meta where
     parseJSON = withObject "Meta" $ \o -> do
@@ -62,7 +63,7 @@ instance FromJSON Meta where
 data Page a = Page
     { pageData :: Data a
     , pageMeta :: Maybe Meta
-    }
+    } deriving stock (Show, Eq)
 
 instance (FromJSON a, Typeable a) => FromJSON (Page a) where
     parseJSON = withObject ("Page " <> type_) $ \o -> do

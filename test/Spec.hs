@@ -1,7 +1,9 @@
 module Main (main) where
 
-import Sauron (projectName)
+import Test.Hspec (hspec)
+
+import Test.Sauron (sauronSpec)
 
 
 main :: IO ()
-main = putStrLn ("Tests for " ++ projectName)
+main = hspec sauronSpec

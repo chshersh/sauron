@@ -82,6 +82,7 @@ library
         Sauron.Top.Client
         Sauron.Top.Json
         Sauron.Top.User
+        Sauron.Top.Tweet
 
   build-depends:
     , aeson                ^>= 2.1
@@ -97,6 +98,26 @@ executable sauron
   hs-source-dirs:      app
   main-is:             Main.hs
   build-depends:       sauron
+  ghc-options:         -threaded
+                       -rtsopts
+                       -with-rtsopts=-N
+
+test-suite sauron-test
+  import:              common-options
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+
+  other-modules:
+    Test.Sauron
+      Test.Sauron.Top
+        Test.Sauron.Top.Tweet
+
+  build-depends:
+    , sauron
+    , aeson
+    , hspec >= 2.9.7 && < 2.11
+
   ghc-options:         -threaded
                        -rtsopts
                        -with-rtsopts=-N
