@@ -111,12 +111,15 @@ test-suite sauron-test
   other-modules:
     Test.Sauron
       Test.Sauron.Top
+        Test.Sauron.Top.Client
         Test.Sauron.Top.Tweet
 
   build-depends:
     , sauron
     , aeson
     , hspec >= 2.9.7 && < 2.11
+    , servant
+    , servant-client-core
 
   ghc-options:         -threaded
                        -rtsopts

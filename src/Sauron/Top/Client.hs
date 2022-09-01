@@ -19,21 +19,29 @@ __Getting tweets by user ID:__
 @
 curl \
     -H "Authorization: Bearer $TWITTER_TOKEN" \
-    'https://api.twitter.com/2/users/2164623379/tweets?max_results=5&exclude=retweets&tweet.fields=created_at,public_metrics&end_time=2022-09-01T13%3A52%3A14Z'
+    ''
 @
 
 -}
 
 module Sauron.Top.Client
-    ( getUserIdByUsername
+    ( -- * User
+      getUserIdByUsername
+
+      -- * Tweets
+    , GetTweets
+
+      -- * Internals
+    , twitterBaseUrl
     ) where
 
 import Control.Exception (throwIO)
-import Servant.API (Capture, Get, Header', JSON, Required, Strict, (:>))
+import Servant.API (Capture, Get, Header', JSON, QueryParam, Required, Strict, (:>))
 import Servant.Client (BaseUrl (..), ClientM, Scheme (Https), client, mkClientEnv, runClientM)
 
 import Sauron.App (App, Env (..))
-import Sauron.Top.Json (Data (..))
+import Sauron.Top.Json (Data (..), Page (..))
+import Sauron.Top.Tweet (Tweet)
 import Sauron.Top.User (UserId, Username (..))
 
 import qualified Iris
@@ -56,7 +64,7 @@ type RequiredHeader = Header' '[Required, Strict]
 https://api.twitter.com/2/users/by/username/:username
 @
 -}
-type UserIdByUsername
+type GetUserIdByUsername
     =  RequiredHeader "Authorization" Text
     :> "users"
     :> "by"
@@ -64,8 +72,8 @@ type UserIdByUsername
     :> Capture "username" Text
     :> Get '[JSON] (Data UserId)
 
-userIdByUsername :: Text -> Text -> ClientM (Data UserId)
-userIdByUsername = client $ Proxy @UserIdByUsername
+getUserIdByUsernameClient :: Text -> Text -> ClientM (Data UserId)
+getUserIdByUsernameClient = client $ Proxy @GetUserIdByUsername
 
 getUserIdByUsername :: Username -> App UserId
 getUserIdByUsername (Username username) = do
@@ -75,9 +83,26 @@ getUserIdByUsername (Username username) = do
     token <- Iris.asksAppEnv envToken
     let auth = "Bearer " <> token
 
-    res <- liftIO $ runClientM (userIdByUsername auth username) clientEnv
+    res <- liftIO $ runClientM (getUserIdByUsernameClient auth username) clientEnv
     case res of
       Right (Data userId) -> pure userId
       Left err -> do
           putStrLn $ "Error: " ++ show err
           liftIO $ throwIO err
+
+{- | API type for the following URL:
+
+@
+https://api.twitter.com/2/users/2164623379/tweets?max_results=5&exclude=retweets&tweet.fields=created_at,public_metrics&end_time=2022-09-01T13%3A52%3A14Z
+@
+-}
+type GetTweets
+    =  RequiredHeader "Authorization" Text
+    :> "users"
+    :> Capture "id" Text
+    :> "tweets"
+    :> QueryParam "max_results" Int
+    :> QueryParam "exclude" Text
+    :> QueryParam "tweet.fields" Text
+    :> QueryParam "end_time" Text
+    :> Get '[JSON] (Page [Tweet])
