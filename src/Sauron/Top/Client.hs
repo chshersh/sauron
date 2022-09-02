@@ -120,7 +120,7 @@ getTweetsClientRequest authToken userId endTime paginationToken = getTweetsClien
     authToken
     userId
     (Just 100)  -- Return 100 requests (max allowed)
-    (Just "retweets,replies")  -- exclude retweets & replies
+    (Just "retweets")  -- exclude retweets & replies
     (Just "created_at,public_metrics")  -- extra fields to return
     (Just endTime)
     paginationToken

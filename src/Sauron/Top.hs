@@ -86,7 +86,10 @@ timelineLoop userId savePath = loop Start
     loop :: TimelineState -> App [Tweet]
     loop Start = do
         now <- liftIO getCurrentTime
+
         let endTime = showTime now
+        putStrLn $ "[debug] Current time: " <> endTime
+
         getTweets userId endTime Nothing >>= \case
             Left err -> loop $ Error (InvalidRequest err) []
             Right Page{..} -> do
@@ -126,6 +129,7 @@ timelineLoop userId savePath = loop Start
                         loop $ NextPage time nextToken (newTweets ++ tweets)
 
     loop (NextDate time tweets) = do
+        putTextLn $ "[debug] Next date: " <> show time
         debugTweets tweets
 
         let endTime = showTime time
