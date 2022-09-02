@@ -62,7 +62,7 @@ instance FromJSON Meta where
 -}
 data Page a = Page
     { pageData :: Data a
-    , pageMeta :: Maybe Meta
+    , pageMeta :: Meta
     } deriving stock (Show, Eq)
 
 instance (FromJSON a, Typeable a) => FromJSON (Page a) where
@@ -70,7 +70,7 @@ instance (FromJSON a, Typeable a) => FromJSON (Page a) where
         pageData <- case fromJSON @(Data a) (Object o) of
             Error err -> fail err
             Success a -> pure a
-        pageMeta <- o .:? "meta"
+        pageMeta <- o .: "meta"
         pure Page{..}
       where
         type_ :: String

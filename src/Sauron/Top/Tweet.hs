@@ -13,11 +13,13 @@ module Sauron.Top.Tweet
       -- * Internals
     , parseTime
     , showTime
+    , subtractSecond
     ) where
 
-import Data.Aeson (FromJSON (..), withObject, (.:))
-import Data.Time.Clock (UTCTime)
-import Data.Time.Format.ISO8601 (formatParseM, formatShowM, iso8601Format)
+import Data.Aeson (FromJSON (..), ToJSON (..), object, withObject, (.:), (.=))
+import Data.Time.Clock (UTCTime, addUTCTime)
+import Data.Time.Format (defaultTimeLocale, formatTime)
+import Data.Time.Format.ISO8601 (formatParseM, iso8601Format)
 
 import Sauron.Top.User (Username (..))
 
@@ -34,8 +36,11 @@ data Tweet = Tweet
 parseTime :: String -> Maybe UTCTime
 parseTime = formatParseM iso8601Format
 
-showTime :: UTCTime -> Maybe String
-showTime = formatShowM iso8601Format
+showTime :: UTCTime -> String
+showTime = formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
+
+subtractSecond :: UTCTime -> UTCTime
+subtractSecond = addUTCTime (-1)
 
 {- | Parses Tweet from the following JSON object:
 
@@ -68,6 +73,16 @@ instance FromJSON Tweet where
 
         pure Tweet{..}
 
+instance ToJSON Tweet where
+    toJSON Tweet{..} = object
+        [ "id"         .= tweetId
+        , "created_at" .= showTime tweetCreatedAt
+        , "text"       .= tweetText
+        , "public_metrics" .= object
+            [ "like_count" .= tweetLikeCount
+            ]
+        ]
+
 -- | Extract top N tweets and pretty format them.
 topTweets :: Int -> Username -> [Tweet] -> Text
 topTweets maxTweets username
@@ -82,7 +97,7 @@ formatTweets username tweets = foldMap formatTweet tweets
     formatTweet :: Tweet -> Text
     formatTweet Tweet{..} = unlines
         [ "URL          : " <> tweetUrl
-        , "Tweeted at   : " <> maybe "<unknown>" toText (showTime tweetCreatedAt)
+        , "Tweeted at   : " <> toText (showTime tweetCreatedAt)
         , "Likes        : " <> show tweetLikeCount
         , "Awesome text :"
         , chunkedText

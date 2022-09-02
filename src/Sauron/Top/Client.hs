@@ -17,7 +17,7 @@ Authorization: Bearer $TWITTER_TOKEN
 
 module Sauron.Top.Client
     ( -- * User
-      getUserIdByUsername
+      getUserByUsername
     , getTweets
 
       -- * Tweets
@@ -35,7 +35,7 @@ import Servant.Client.Core (ClientError)
 import Sauron.App (App, Env (..))
 import Sauron.Top.Json (Data (..), Page (..))
 import Sauron.Top.Tweet (Tweet)
-import Sauron.Top.User (UserId, Username (..))
+import Sauron.Top.User (User, UserId, Username (..))
 
 import qualified Iris
 
@@ -57,26 +57,27 @@ type RequiredHeader = Header' '[Required, Strict]
 https://api.twitter.com/2/users/by/username/:username
 @
 -}
-type GetUserIdByUsername
+type GetUserByUsername
     =  RequiredHeader "Authorization" Text
     :> "users"
     :> "by"
     :> "username"
     :> Capture "username" Username
-    :> Get '[JSON] (Data UserId)
+    :> QueryParam "user.fields" Text
+    :> Get '[JSON] (Data User)
 
-getUserIdByUsernameClient :: Text -> Username -> ClientM (Data UserId)
-getUserIdByUsernameClient = client $ Proxy @GetUserIdByUsername
+getUserByUsernameClient :: Text -> Username -> Maybe Text -> ClientM (Data User)
+getUserByUsernameClient = client $ Proxy @GetUserByUsername
 
-getUserIdByUsername :: Username -> App UserId
-getUserIdByUsername username = do
+getUserByUsername :: Username -> App User
+getUserByUsername username = do
     manager <- Iris.asksAppEnv envManager
     let clientEnv = mkClientEnv manager twitterBaseUrl
 
     token <- Iris.asksAppEnv envToken
     let auth = "Bearer " <> token
 
-    let request = getUserIdByUsernameClient auth username
+    let request = getUserByUsernameClient auth username (Just "public_metrics")
 
     res <- liftIO $ runClientM request clientEnv
     case res of
@@ -119,7 +120,7 @@ getTweetsClientRequest authToken userId endTime paginationToken = getTweetsClien
     authToken
     userId
     (Just 100)  -- Return 100 requests (max allowed)
-    (Just "retweets")  -- exclude retweets
+    (Just "retweets,replies")  -- exclude retweets & replies
     (Just "created_at,public_metrics")  -- extra fields to return
     (Just endTime)
     paginationToken

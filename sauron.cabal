@@ -59,6 +59,7 @@ common common-options
                        InstanceSigs
                        KindSignatures
                        LambdaCase
+                       NumericUnderscores
                        OverloadedStrings
                        RecordWildCards
                        ScopedTypeVariables
@@ -87,6 +88,7 @@ library
 
   build-depends:
     , aeson                ^>= 2.1
+    , aeson-pretty         ^>= 0.8
     , http-client          ^>= 0.7
     , http-client-tls      ^>= 0.3
     , iris                 ^>= 0.0
@@ -120,7 +122,9 @@ test-suite sauron-test
   build-depends:
     , sauron
     , aeson
-    , hspec >= 2.9.7 && < 2.11
+    , hedgehog       ^>= 1.2
+    , hspec           >= 2.9.7 && < 2.11
+    , hspec-hedgehog ^>= 0.0
     , servant
     , servant-client-core
     , time

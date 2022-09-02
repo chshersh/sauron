@@ -8,7 +8,8 @@ User-related types in the 'sauron top' command.
 
 module Sauron.Top.User
     ( -- * Core types
-      UserId (..)
+      User (..)
+    , UserId (..)
     , Username (..)
     , mkUsername
     ) where
@@ -22,25 +23,7 @@ import qualified Data.Text as Text
 -- | A Twitter User ID like: "2244994945"
 newtype UserId = UserId
     { unUserId :: Text
-    } deriving newtype (ToHttpApiData)
-
-{- |
-
-Parses 'UserId' from JSON (excluding the data part, it's handled by the 'Data' type):
-
-@
-{ "data": {
-      "id":"2164623379",
-      "name":"Dmitrii Kovanikov",
-      "username":"ChShersh"
-  }
-}
-@
--}
-instance FromJSON UserId where
-    parseJSON = withObject "UserId" $ \o -> do
-        uid <- o .: "id"
-        pure $ UserId uid
+    } deriving newtype (FromJSON, ToHttpApiData)
 
 {- | Stores Twitter Username handle without \@.
 
@@ -57,5 +40,36 @@ mkUsername username
     $ fromMaybe username
     $ Text.stripPrefix "@" username
 
--- {- | Object representing all the user tweets in their timeline.
--- data Timeline
+data User = User
+    { userId         :: UserId
+    , userTweetCount :: Int
+    }
+
+
+{- | Parses 'UserId' from JSON (excluding the data part, it's handled
+by the 'Data' type):
+
+@
+{
+  "data": {
+    "id": "2164623379",
+    "username": "ChShersh",
+    "name": "Dmitrii Kovanikov",
+    "public_metrics": {
+      "followers_count": 2977,
+      "following_count": 489,
+      "tweet_count": 6502,
+      "listed_count": 59
+    }
+  }
+}
+@
+-}
+instance FromJSON User where
+    parseJSON = withObject "User" $ \o -> do
+        userId <- o .: "id"
+
+        publicMetrics <- o .: "public_metrics"
+        userTweetCount <- publicMetrics .: "tweet_count"
+
+        pure User{..}

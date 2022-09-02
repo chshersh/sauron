@@ -1,14 +1,17 @@
 module Test.Sauron.Top.Tweet (tweetSpec) where
 
 import Data.Time.Calendar (fromGregorian)
-import Data.Time.Clock (DiffTime, UTCTime (..))
+import Data.Time.Clock (DiffTime, UTCTime (..), secondsToDiffTime)
 import Data.Time.Format (defaultTimeLocale, parseTimeM)
+import Hedgehog (Gen, forAll, tripping)
 import Test.Hspec (Spec, describe, it, shouldBe, shouldReturn)
+import Test.Hspec.Hedgehog (hedgehog)
 
-import Sauron.Top.Json (Data (..), Meta (..), Page (..))
-import Sauron.Top.Tweet (Tweet (..), parseTime, showTime)
+import Sauron.Top.Tweet (Tweet (..), parseTime, showTime, subtractSecond)
 
 import qualified Data.Aeson as Aeson
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
 
 
 tweetSpec :: Spec
@@ -16,25 +19,26 @@ tweetSpec = describe "Tweet" $ do
     it "parses the time" $ do
         parseTime "2022-09-01T07:54:18.000Z" `shouldBe`
             Just (UTCTime (fromGregorian 2022 9 1) (parseTod "07:54:18"))
+
     it "shows the time" $ do
         showTime (UTCTime (fromGregorian 2022 9 1) (parseTod "07:54:18"))
-            `shouldBe` Just "2022-09-01T07:54:18Z"
+            `shouldBe` "2022-09-01T07:54:18Z"
+
+    it "subtracts one second" $ do
+        subtractSecond (UTCTime (fromGregorian 2022 9 1) (parseTod "07:54:18"))
+            `shouldBe` (UTCTime (fromGregorian 2022 9 1) (parseTod "07:54:17"))
+
     it "parses the example JSON tweet timeline" $
-        Aeson.eitherDecodeFileStrict "example.json" `shouldReturn` Right exampleTimeline
+        Aeson.eitherDecodeFileStrict "example.json" `shouldReturn` Right exampleTweets
+
+    it "decodeJSON . encodeJSON = id" $ hedgehog $ do
+        tweet <- forAll genTweet
+        tripping tweet Aeson.encode Aeson.eitherDecode
 
 parseTod :: String -> DiffTime
 parseTod
     = fromMaybe (error "parsing time")
     . parseTimeM True defaultTimeLocale "%H:%M:%S"
-
-exampleTimeline :: Page [Tweet]
-exampleTimeline = Page
-    { pageData = Data exampleTweets
-    , pageMeta = Just Meta
-        { metaResultCount = 5
-        , metaNextToken = Just "7140dibdnow9c7btw4232rrxi2153ga6h81clvyarutkk"
-        }
-    }
 
 exampleTweets :: [Tweet]
 exampleTweets =
@@ -69,3 +73,20 @@ exampleTweets =
         , tweetCreatedAt = UTCTime (fromGregorian 2022 9 1) (parseTod "07:54:16")
         }
     ]
+
+genTweet :: Gen Tweet
+genTweet = Tweet
+    <$> Gen.text (Range.linear 1 20) Gen.digit
+    <*> Gen.text (Range.linear 1 280) Gen.unicode
+    <*> Gen.int (Range.linear 0 100_000)
+    <*> genUTCTime
+
+genUTCTime :: Gen UTCTime
+genUTCTime = do
+    y <- toInteger <$> Gen.int (Range.constant 2000 2022)
+    m <- Gen.int (Range.constant 1 12)
+    d <- Gen.int (Range.constant 1 28)
+    let day = fromGregorian y m d
+    secs <- toInteger <$> Gen.int (Range.constant 0 86401)
+    let diff = secondsToDiffTime secs
+    pure $ UTCTime day diff
