@@ -16,7 +16,7 @@ module Sauron.Top.Tweet
     , subtractSecond
     ) where
 
-import Data.Aeson (FromJSON (..), ToJSON (..), object, withObject, (.:), (.=))
+import Data.Aeson (FromJSON (..), ToJSON (..), object, withObject, (.!=), (.:), (.:?), (.=))
 import Data.Time.Clock (UTCTime, addUTCTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import Data.Time.Format.ISO8601 (formatParseM, iso8601Format)
@@ -27,10 +27,13 @@ import qualified Data.Text as Text
 
 
 data Tweet = Tweet
-    { tweetId        :: Text
-    , tweetText      :: Text
-    , tweetLikeCount :: Int
-    , tweetCreatedAt :: UTCTime
+    { tweetId           :: Text
+    , tweetText         :: Text
+    , tweetCreatedAt    :: UTCTime
+    , tweetLikeCount    :: Int
+    , tweetRetweetCount :: Int
+    , tweetReplyCount   :: Int
+    , tweetQuoteCount   :: Int
     } deriving stock (Show, Eq)
 
 parseTime :: String -> Maybe UTCTime
@@ -69,7 +72,10 @@ instance FromJSON Tweet where
             Just time -> pure time
 
         publicMetrics <- o .: "public_metrics"
-        tweetLikeCount <- publicMetrics .: "like_count"
+        tweetLikeCount    <- publicMetrics .: "like_count"
+        tweetRetweetCount <- publicMetrics .:? "retweet_count" .!= 0
+        tweetReplyCount   <- publicMetrics .:? "reply_count"   .!= 0
+        tweetQuoteCount   <- publicMetrics .:? "quote_count"   .!= 0
 
         pure Tweet{..}
 
@@ -79,7 +85,10 @@ instance ToJSON Tweet where
         , "created_at" .= showTime tweetCreatedAt
         , "text"       .= tweetText
         , "public_metrics" .= object
-            [ "like_count" .= tweetLikeCount
+            [ "like_count"    .= tweetLikeCount
+            , "retweet_count" .= tweetRetweetCount
+            , "reply_count"   .= tweetReplyCount
+            , "quote_count"   .= tweetQuoteCount
             ]
         ]
 
