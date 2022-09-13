@@ -32,7 +32,8 @@ import Servant.API (Capture, Get, Header', JSON, QueryParam, Required, Strict, (
 import Servant.Client (BaseUrl (..), ClientM, Scheme (Https), client, mkClientEnv, runClientM)
 import Servant.Client.Core (ClientError)
 
-import Sauron.App (App, Env (..))
+import Sauron.App (App)
+import Sauron.Env (Env (..))
 import Sauron.Top.Json (Data (..), Page (..))
 import Sauron.Top.Tweet (Tweet)
 import Sauron.Top.User (User, UserId, Username (..))
