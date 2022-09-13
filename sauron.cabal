@@ -80,6 +80,8 @@ library
     Sauron
       Sauron.App
       Sauron.Cli
+      Sauron.Env
+      Sauron.Settings
       Sauron.Top
         Sauron.Top.Client
         Sauron.Top.Json
